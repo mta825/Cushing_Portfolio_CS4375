@@ -8,4 +8,4 @@
  
  See the corresponding code [here](statistics.cpp)
  
- See the Linear Models notebooks [here](Regression.pdf) and [here](Classification.pdf)
+ See the Linear Models notebooks here: [Regression](Regression.pdf) and [Classification](Classification.pdf)
