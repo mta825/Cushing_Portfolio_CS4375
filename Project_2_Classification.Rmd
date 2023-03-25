@@ -1,0 +1,99 @@
+---
+title: "Project_Classification"
+output: html_document
+date: "2023-03-23"
+author: "Mason Cushing"
+---
+
+We begin by dividing the data into train and test sections.
+Note that the knn function requires different data than the other functions do,
+so I have two sets of divisions.
+
+My data was too large, so I took a subset of it. It gives data about a flight
+and whether it was delayed. I will be trying to predict whether a flight was
+delayed based on this data.
+
+The data is found here: https://www.kaggle.com/datasets/ulrikthygepedersen/airlines-delay
+```{r}
+airlines_delay <- read.csv("~/Downloads/airlines_delay.csv")
+df<-airlines_delay[airlines_delay$Airline == "DL",]
+df<-subset(df,select=-c(Flight,Airline))
+df$AirportFrom<-as.factor(df$AirportFrom)
+df$AirportTo<-as.factor(df$AirportTo)
+df$DayOfWeek<-as.factor(df$DayOfWeek)
+df$Class<-as.factor(df$Class)
+kdf<-subset(df,select=-c(Class))
+kdf$AirportFrom<-as.numeric(kdf$AirportFrom)
+kdf$AirportTo<-as.numeric(kdf$AirportTo)
+kdf$DayOfWeek<-as.numeric(kdf$DayOfWeek)
+set.seed(1969)
+t <- sample(nrow(df),50000)
+train<-df[t,]
+test<-df[-t,]
+ktrain<-kdf[t,]
+ktest<-kdf[-t,]
+```
+
+We will then explore this data statistically and graphically.
+```{r}
+mean(as.numeric(df$Class)-1)
+mean(df$Time)
+median(df$Time)
+mean(df$Length)
+median(df$Length)
+delayed<-df[df$Class==0,]
+notdelayed<-df[df$Class==1,]
+plot(delayed$Time,delayed$Length)
+plot(notdelayed$Time,notdelayed$Length)
+plot(df$Time,df$Length,col=df$Class)
+liechtenstein<-df[df$AirportFrom == "LIH" | df$AirportTo == "LIH",]
+indonesia<-df[df$AirportFrom == "KOA" | df$AirportTo == "KOA",]
+mean(as.numeric(liechtenstein$Class)-1)
+mean(as.numeric(indonesia$Class)-1)
+```
+Note that the graphs look very similar for what we are trying to distinguish 
+based on time and length. I would not expect accuracy to be great based on this
+data.
+
+However, some airports are oddly consistent with not delaying flights, and 
+Liechtenstein and Indonesia are among those airports. Average rates are shown.
+
+We will next predict whether the flight was delayed using logistic regression,
+kNN, and decision trees in that order below.
+```{r}
+model1<-glm(Class~.,data=train,family=binomial)
+lpred<-predict(model1,newdata=test)
+lpred[lpred<=0]<-0
+lpred[lpred>=1]<-1
+lpred<-round(lpred)
+mean(lpred==test$Class)
+library(class)
+kmodel<-knn(train=ktrain,test=ktest,cl=train$Class,k=3)
+kmodel<-as.numeric(kmodel)
+mean((kmodel-1)==test$Class)
+library(rpart)
+dtree<-rpart(Class~., data=train,method="class")
+dpred<-predict(dtree,newdata=test,type="class")
+mean(dpred==test$Class)
+summary(model1)
+summary(kmodel)
+plot(dtree,margin=0.2)
+text(dtree)
+```
+
+Notice that the methods become progressively better, with logistic regression
+being the worst and decision trees being the most accurate, while they don't 
+differ by more than two percentage points, so no method outperforms another by 
+a significant margin. 
+
+Overall, it seems that no algorithm was able to get a great read on whether a 
+flight is delayed. We would expect this given the data, if this were simple to 
+predict with this data, the airlines would know about it and have problems they
+need to fix. More than likely, a weather field would have the information needed
+to get a higher accuracy than about sixty percent, but that wasn't given in the
+data. Thus, as these algorithms went through the data, as logistic regression
+looked for a linear classification separator, it was unable to find one, and
+decision trees would have ran into the same issue. The failure of kNN to find a 
+trend reflects both the data's relative lack of one and the odd way its inner
+workings interact with factors, as they have to be arbitrarily ordered and kNN
+assigns their values mathematical meaning where there is none. 
