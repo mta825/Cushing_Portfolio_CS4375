@@ -15,3 +15,5 @@
  See the code for [Logistic Regression](logistic_regression.cpp) and [Naïve Bayes](naive_bayes.cpp) on the Titanic data at these links.
  
  See the report corresponding to my part of the Similarity and Ensemble group project [here](Project_2_Classification.pdf)
+
+ See the SKLearn Python notebook [here](SKLearn_Example.pdf)
