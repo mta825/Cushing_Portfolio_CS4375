@@ -17,3 +17,5 @@
  See the report corresponding to my part of the Similarity and Ensemble group project [here](Project_2_Classification.pdf)
 
  See the SKLearn Python notebook [here](SKLearn_Example.pdf)
+ 
+ See my deep learning image classification on butterflies and moths [here](DL_Image_Classification.pdf)
